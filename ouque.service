@@ -1,0 +1,16 @@
+[Unit]
+Description=ouque.service
+Requires=network.target
+
+[Service]
+Type=simple
+User=paul
+Group=paul
+WorkingDirectory= /opt/ouque/
+ExecStart=/usr/bin/local/node index.js
+TimeoutSec=30
+RestartSec=15s
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

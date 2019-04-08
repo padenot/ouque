@@ -1,0 +1,24 @@
+{
+  "name": "ouque",
+  "version": "1.0.0",
+  "description": "a very simple thing to rebuild a hugo blog when a push happens on github",
+  "main": "index.js",
+  "dependencies": {
+    "node-github-webhook": "^1.0.7",
+    "prettier": "^1.16.4"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/padenot/ouque.git"
+  },
+  "author": "Paul Adenot",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/padenot/ouque/issues"
+  },
+  "homepage": "https://github.com/padenot/ouque#readme"
+}
