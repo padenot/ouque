@@ -7,5 +7,4 @@ fi
 
 cd blog
 git pull origin master
-hugo
-cp -r public/* /var/www/blog/
+hugo -d /var/www/blog --cleanDestinationDir
