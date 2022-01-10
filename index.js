@@ -1,51 +1,57 @@
 var http = require("http");
+var process = require("process");
 var fs = require("fs");
 const { spawnSync } = require("child_process");
 var createHandler = require("node-github-webhook");
 
-secret = fs.readFileSync("SECRET", "utf8");
+var port = parseInt(process.argv[2]) || 7777;
 
-if (secret) {
-  secret = secret.trim();
+var config = fs.readFileSync("config.json", "utf8");
+
+if (config) {
+  config = JSON.parse(config);
 } else {
-  console.log("Need a file at the root called SECRET, with the secret.");
+  console.log("Need a file at the root called config.json, with the secrets and scripts.");
   return;
 }
 
-var handler = createHandler({ path: "/", secret: secret });
+function generaterHandler(handlerOpts) {
+  var handlers = handlerOpts.reduce(function(hs, opts) {
+    const handler = createHandler(opts);
+    handler.on('error', function(err) {
+      console.error('Error:', err.message)
+    })
+    handler.on('push', function (event) {
+      var url = event.url
+      console.log("push on " + event.url);
+      var out = spawnSync("./" + config[event.url].script);
+      console.log(`stderr: ${out.stderr.toString()}`);
+      console.log(`stdout: ${out.stdout.toString()}`);
+    })
 
-http
-  .createServer(function(req, res) {
-    handler(req, res, function(err) {
-      res.statusCode = 404;
-      res.end("no such location");
+    handler.on("error", function(err) {
+      console.error("Error:", err.message);
     });
-  })
-  .listen(7777);
 
-handler.on("error", function(err) {
-  console.error("Error:", err.message);
-});
+    handler.on("ping", function(event) {
+      console.log("ping");
+    });
+    hs[opts.path] = handler;
+    return hs
+  }, {})
 
-handler.on("ping", function(event) {
-  console.log("ping");
-});
+  return http.createServer(function(req, res) {
+    var handler = handlers[req.url]
+    handler(req, res, function(err) {
+      res.statusCode = 404
+      res.end('no such location')
+    })
+  }).listen(7777)
+}
 
-handler.on("push", function(event) {
-  console.log(
-    "Received a push event for %s to %s",
-    event.payload.repository.name,
-    event.payload.ref
-  );
-  switch (event.path) {
-    case "/":
-      ls = spawnSync("./blogupdate.sh");
+var handlerOpts = []
+for (var repo in config) {
+  handlerOpts.push({path: repo, secret: config[repo].secret});
+}
 
-      console.log(`stderr: ${ls.stderr.toString()}`);
-      console.log(`stdout: ${ls.stdout.toString()}`);
-      break;
-    default:
-      console.log("Unexpected event path: " + event.path);
-      break;
-  }
-});
+var handler = generaterHandler(handlerOpts)
