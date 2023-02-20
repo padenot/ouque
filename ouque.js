@@ -1,7 +1,7 @@
 var http = require("http");
 var process = require("process");
 var fs = require("fs");
-const { spawnSync } = require("child_process");
+const { spawn } = require("child_process");
 var createHandler = require("node-github-webhook");
 
 var port = parseInt(process.argv[2]) || 7777;
