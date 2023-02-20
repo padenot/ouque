@@ -10,6 +10,7 @@ var config = fs.readFileSync("config.json", "utf8");
 
 if (config) {
   config = JSON.parse(config);
+  console.log(`Listening on ${port}`);
 } else {
   console.log("Need a file at the root called config.json, with the secrets and scripts.");
   return;
@@ -24,7 +25,7 @@ function generaterHandler(handlerOpts) {
     handler.on('push', function (event) {
       var url = event.url
       console.log("push on " + event.url);
-      var out = spawnSync("./" + config[event.url].script);
+      var out = spawn("./" + config[event.url].script);
       console.log(`stderr: ${out.stderr.toString()}`);
       console.log(`stdout: ${out.stdout.toString()}`);
     })
